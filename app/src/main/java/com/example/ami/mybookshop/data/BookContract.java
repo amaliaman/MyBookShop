@@ -19,8 +19,8 @@ public final class BookContract {
 
         // SQL statements
         private static final String TEXT_TYPE = " TEXT";
-        static final String INTEGER_TYPE = " INTEGER";
-        static final String REAL_TYPE = " REAL";
+        private static final String INTEGER_TYPE = " INTEGER";
+        private static final String REAL_TYPE = " REAL";
         private static final String NOT_NULL = " NOT NULL";
         private static final String COMMA_SEP = ", ";
         // Create table

@@ -82,7 +82,14 @@ public class CatalogActivity extends AppCompatActivity {
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = db.insert(BookEntry.TABLE_NAME, null, values);
-        Toast.makeText(this, "New row id: " + newRowId, Toast.LENGTH_SHORT).show();
+        String message = null;
+        if (newRowId != -1) {
+            message = "New row id: " + newRowId;
+        } else {
+            message = "Error saving book";
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
     }
 
     /**
@@ -116,12 +123,17 @@ public class CatalogActivity extends AppCompatActivity {
         try {
             displayView.setText(String.format(Locale.getDefault(), "%s %d %s.\n\n",
                     getString(R.string.dummy_books_string), cursor.getCount(), getString(R.string.dummy_books_string_end)));
-            displayView.append(BookEntry._ID + " - " +
-                    BookEntry.COLUMN_BOOK_NAME + " - " +
-                    BookEntry.COLUMN_BOOK_PRICE + " - " +
-                    BookEntry.COLUMN_BOOK_QUANTITY + " - " +
-                    BookEntry.COLUMN_BOOK_SUPPLIER_NAME + " - " +
-                    BookEntry.COLUMN_BOOK_SUPPLIER_PHONE + "\n");
+
+            final String DELIMITER = " - ";
+            final String NEW_LINE = "\n";
+            StringBuilder sb = new StringBuilder();
+            sb.append(BookEntry._ID).append(DELIMITER)
+                    .append(BookEntry.COLUMN_BOOK_NAME).append(DELIMITER)
+                    .append(BookEntry.COLUMN_BOOK_PRICE).append(DELIMITER)
+                    .append(BookEntry.COLUMN_BOOK_QUANTITY).append(DELIMITER)
+                    .append(BookEntry.COLUMN_BOOK_SUPPLIER_NAME).append(DELIMITER)
+                    .append(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE).append(NEW_LINE);
+            displayView.append(sb);
 
             // Figure out the index of each column
             int idColumnIndex = cursor.getColumnIndex(BookEntry._ID);
@@ -143,13 +155,21 @@ public class CatalogActivity extends AppCompatActivity {
                 String currentSupplierPhone = cursor.getString(supplierPhoneColumnIndex);
 
                 // Display the values from each column of the current row in the cursor in the TextView
-                displayView.append(("\n" + currentID + " - " +
-                        currentName + " - " +
-                        currentPrice + " - " +
-                        currentQuantity + " - " +
-                        currentSupplierName + " - " +
-                        currentSupplierPhone
-                ));
+                sb.setLength(0);
+                sb.append(NEW_LINE).append(currentID).append(DELIMITER)
+                        .append(currentName).append(DELIMITER)
+                        .append(currentPrice).append(DELIMITER)
+                        .append(currentQuantity).append(DELIMITER)
+                        .append(currentSupplierName).append(DELIMITER)
+                        .append(currentSupplierPhone).append(DELIMITER);
+//                displayView.append("\n" + currentID + " - " +
+//                        currentName + " - " +
+//                        currentPrice + " - " +
+//                        currentQuantity + " - " +
+//                        currentSupplierName + " - " +
+//                        currentSupplierPhone
+//                );
+                displayView.append(sb);
             }
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
