@@ -2,4 +2,7 @@
     <string name="app_name">My Book Shop</string>
     <string name="editor_label">Book Details</string>
     <string name="save">Save</string>
+    <string name="action_insert_dummy_data">Insert Dummy Data</string>
+    <string name="dummy_books_string">The books table contains</string>
+    <string name="dummy_books_string_end">books</string>
 </resources>
