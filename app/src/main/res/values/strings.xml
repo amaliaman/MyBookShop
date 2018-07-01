@@ -5,4 +5,14 @@
     <string name="action_insert_dummy_data">Insert Dummy Data</string>
     <string name="dummy_books_string">The books table contains</string>
     <string name="dummy_books_string_end">books</string>
+
+    <!-- Category options -->
+    <string name="category_general">General</string>
+    <string name="category_fiction">Fiction</string>
+    <string name="category_children">Children</string>
+    <string name="category_science_fiction">Science Fiction</string>
+    <string name="category_art_photography">Art &amp; Photography</string>
+    <string name="category_biography">Biography</string>
+    <string name="category_crime_thriller">Crime &amp; Thriller</string>
+    <string name="category_history">History</string>
 </resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- These are the options displayed in the Category drop-down Spinner -->
+    <string-array name="array_category_options">
+        <item>@string/category_general</item>
+        <item>@string/category_fiction</item>
+        <item>@string/category_children</item>
+        <item>@string/category_science_fiction</item>
+        <item>@string/category_art_photography</item>
+        <item>@string/category_biography</item>
+        <item>@string/category_crime_thriller</item>
+        <item>@string/category_history</item>
+    </string-array>
+
+</resources>

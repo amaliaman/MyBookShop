@@ -18,8 +18,14 @@
         </activity>
         <activity
             android:name=".EditorActivity"
-            android:parentActivityName=".CatalogActivity"
-            android:label="@string/editor_label"/>
+            android:label="@string/editor_label"
+            android:parentActivityName=".CatalogActivity" />
+
+        <provider
+            android:name=".data.BookProvider"
+            android:authorities="com.example.ami.mybookshop"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

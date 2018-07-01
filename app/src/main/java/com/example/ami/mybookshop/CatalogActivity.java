@@ -110,7 +110,7 @@ public class CatalogActivity extends AppCompatActivity {
 
         Cursor cursor = db.query(
                 BookEntry.TABLE_NAME,   // The table to query
-                columns,             // The array of columns to return (pass null to get all)
+                null,             // The array of columns to return (pass null to get all)
                 null,              // The columns for the WHERE clause
                 null,          // The values for the WHERE clause
                 null,                   // don't group the rows
@@ -162,13 +162,6 @@ public class CatalogActivity extends AppCompatActivity {
                         .append(currentQuantity).append(DELIMITER)
                         .append(currentSupplierName).append(DELIMITER)
                         .append(currentSupplierPhone).append(DELIMITER);
-//                displayView.append("\n" + currentID + " - " +
-//                        currentName + " - " +
-//                        currentPrice + " - " +
-//                        currentQuantity + " - " +
-//                        currentSupplierName + " - " +
-//                        currentSupplierPhone
-//                );
                 displayView.append(sb);
             }
         } finally {
