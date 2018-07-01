@@ -15,4 +15,11 @@
     <string name="category_biography">Biography</string>
     <string name="category_crime_thriller">Crime &amp; Thriller</string>
     <string name="category_history">History</string>
+
+    <string name="empty_view_title_text">No books in this shop…</string>
+    <string name="empty_view_subtitle_text">Add some books</string>
+    <string name="sale">Sale</string>
+    <string name="details">Details</string>
+    <string name="quantity_label">Quantity:</string>
+    <string name="price_label">Price:</string>
 </resources>

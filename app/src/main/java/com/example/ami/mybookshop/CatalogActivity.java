@@ -1,26 +1,27 @@
 package com.example.ami.mybookshop;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.ami.mybookshop.data.BookContract.BookEntry;
-import com.example.ami.mybookshop.data.BookDbHelper;
 
-import java.util.Locale;
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-public class CatalogActivity extends AppCompatActivity {
-
-    BookDbHelper mDbHelper;
+    private static final int BOOK_LOADER = 0;
+    private BookCursorAdapter mBooksAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +38,23 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        // Get DB helper
-        mDbHelper = new BookDbHelper(this);
+        // Find ListView to populate
+        ListView bookListView = findViewById(R.id.book_list);
+
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        bookListView.setEmptyView(emptyView);
+        // todo: show/hide empty text view when data loaded
+
+        // Setup cursor adapter using cursor from last step
+        mBooksAdapter = new BookCursorAdapter(this, null);
+
+        // Attach cursor adapter to the ListView
+        bookListView.setAdapter(mBooksAdapter);
+
+        // Prepare the loader. Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(BOOK_LOADER, null, this);
     }
 
     /**
@@ -58,8 +74,7 @@ public class CatalogActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
-                insertBook();
-                displayDatabaseInfo();
+                insertDummyBook();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -68,112 +83,56 @@ public class CatalogActivity extends AppCompatActivity {
     /**
      * Insert dummy data to test the app
      */
-    private void insertBook() {
-        // Gets the data repository in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
+    private void insertDummyBook() {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(BookEntry.COLUMN_BOOK_NAME, "Three Men in a Boat");
+        values.put(BookEntry.COLUMN_BOOK_AUTHOR, "Jerome K. Jerome");
+        values.put(BookEntry.COLUMN_BOOK_YEAR, 1889);
+        values.put(BookEntry.COLUMN_BOOK_CATEGORY, this.getString(R.string.category_fiction));
         values.put(BookEntry.COLUMN_BOOK_PRICE, 7.99);
         values.put(BookEntry.COLUMN_BOOK_QUANTITY, 3);
         values.put(BookEntry.COLUMN_BOOK_SUPPLIER_NAME, "BooksRUs");
         values.put(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE, "555-666-777");
 
         // Insert the new row, returning the primary key value of the new row
-        long newRowId = db.insert(BookEntry.TABLE_NAME, null, values);
-        String message = null;
-        if (newRowId != -1) {
-            message = "New row id: " + newRowId;
+        Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
+
+        String message = "";
+        if (newUri != null) {
+            message = "Book saved";
         } else {
             message = "Error saving book";
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-
     }
 
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        String[] columns = {BookEntry._ID,
-                BookEntry.COLUMN_BOOK_NAME,
-                BookEntry.COLUMN_BOOK_PRICE,
-                BookEntry.COLUMN_BOOK_QUANTITY,
-                BookEntry.COLUMN_BOOK_SUPPLIER_NAME,
-                BookEntry.COLUMN_BOOK_SUPPLIER_PHONE
-        };
-
-        Cursor cursor = db.query(
-                BookEntry.TABLE_NAME,   // The table to query
-                null,             // The array of columns to return (pass null to get all)
-                null,              // The columns for the WHERE clause
-                null,          // The values for the WHERE clause
-                null,                   // don't group the rows
-                null,                   // don't filter by row groups
-                null               // The sort order
-        );
-
-        TextView displayView = findViewById(R.id.text_view_dummy);
-
-        try {
-            displayView.setText(String.format(Locale.getDefault(), "%s %d %s.\n\n",
-                    getString(R.string.dummy_books_string), cursor.getCount(), getString(R.string.dummy_books_string_end)));
-
-            final String DELIMITER = " - ";
-            final String NEW_LINE = "\n";
-            StringBuilder sb = new StringBuilder();
-            sb.append(BookEntry._ID).append(DELIMITER)
-                    .append(BookEntry.COLUMN_BOOK_NAME).append(DELIMITER)
-                    .append(BookEntry.COLUMN_BOOK_PRICE).append(DELIMITER)
-                    .append(BookEntry.COLUMN_BOOK_QUANTITY).append(DELIMITER)
-                    .append(BookEntry.COLUMN_BOOK_SUPPLIER_NAME).append(DELIMITER)
-                    .append(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE).append(NEW_LINE);
-            displayView.append(sb);
-
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(BookEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_BOOK_NAME);
-            int priceColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_BOOK_PRICE);
-            int quantityColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_BOOK_QUANTITY);
-            int supplierNameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_NAME);
-            int supplierPhoneColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE);
-
-            // Iterate through all the returned rows in the cursor
-            while (cursor.moveToNext()) {
-                // Use that index to extract the String or Int value of the word
-                // at the current row the cursor is on.
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                String currentPrice = String.valueOf(cursor.getDouble(priceColumnIndex));
-                String currentQuantity = String.valueOf(cursor.getInt(quantityColumnIndex));
-                String currentSupplierName = cursor.getString(supplierNameColumnIndex);
-                String currentSupplierPhone = cursor.getString(supplierPhoneColumnIndex);
-
-                // Display the values from each column of the current row in the cursor in the TextView
-                sb.setLength(0);
-                sb.append(NEW_LINE).append(currentID).append(DELIMITER)
-                        .append(currentName).append(DELIMITER)
-                        .append(currentPrice).append(DELIMITER)
-                        .append(currentQuantity).append(DELIMITER)
-                        .append(currentSupplierName).append(DELIMITER)
-                        .append(currentSupplierPhone).append(DELIMITER);
-                displayView.append(sb);
-            }
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
-    }
-
+    // Called when a new Loader needs to be created
     @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = new String[]{
+                BookEntry._ID,
+                BookEntry.COLUMN_BOOK_NAME,
+                BookEntry.COLUMN_BOOK_AUTHOR,
+                BookEntry.COLUMN_BOOK_PRICE,
+                BookEntry.COLUMN_BOOK_QUANTITY
+        };
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        return new CursorLoader(this, BookEntry.CONTENT_URI,
+                projection, null, null, null);
+    }
+
+    // Called when a previously created loader has finished loading
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mBooksAdapter.swapCursor(data);
+    }
+
+    // Called when a previously created loader is reset, making the data unavailable
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mBooksAdapter.swapCursor(null);
     }
 }
