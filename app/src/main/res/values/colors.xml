@@ -4,13 +4,13 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <!--https://material.io/tools/color/#!/?view.left=0&view.right=0&primary.color=4A148C&secondary.color=FBC02D-->
-    <color name="primaryColor">#4a148c</color>
-    <color name="primaryLightColor">#7c43bd</color>
-    <color name="primaryDarkColor">#12005e</color>
-    <color name="secondaryColor">#fbc02d</color>
-    <color name="secondaryLightColor">#fff263</color>
-    <color name="secondaryDarkColor">#c49000</color>
+    <!--https://material.io/tools/color/#!/?view.left=0&view.right=0&primary.color=AB47BC&secondary.color=FFCA28-->
+    <color name="primaryColor">#ab47bc</color>
+    <color name="primaryLightColor">#df78ef</color>
+    <color name="primaryDarkColor">#790e8b</color>
+    <color name="secondaryColor">#ffca28</color>
+    <color name="secondaryLightColor">#fffd61</color>
+    <color name="secondaryDarkColor">#c79a00</color>
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#000000</color>
 </resources>

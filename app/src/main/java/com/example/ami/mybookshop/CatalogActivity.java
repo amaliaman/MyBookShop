@@ -1,6 +1,7 @@
 package com.example.ami.mybookshop;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -55,6 +57,17 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // Prepare the loader. Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(BOOK_LOADER, null, this);
+
+        // Setup list item click to go to details activity
+        bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent editIntent = new Intent(CatalogActivity.this, EditorActivity.class);
+                Uri currentBookUri = ContentUris.withAppendedId(BookEntry.CONTENT_URI, id);
+                editIntent.setData(currentBookUri);
+                startActivity(editIntent);
+            }
+        });
     }
 
     /**
@@ -89,9 +102,9 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         values.put(BookEntry.COLUMN_BOOK_NAME, "Three Men in a Boat");
         values.put(BookEntry.COLUMN_BOOK_AUTHOR, "Jerome K. Jerome");
         values.put(BookEntry.COLUMN_BOOK_YEAR, 1889);
-        values.put(BookEntry.COLUMN_BOOK_CATEGORY, this.getString(R.string.category_fiction));
+        values.put(BookEntry.COLUMN_BOOK_CATEGORY, 1);
         values.put(BookEntry.COLUMN_BOOK_PRICE, 7.99);
-        values.put(BookEntry.COLUMN_BOOK_QUANTITY, 3);
+        values.put(BookEntry.COLUMN_BOOK_QUANTITY, 44);
         values.put(BookEntry.COLUMN_BOOK_SUPPLIER_NAME, "BooksRUs");
         values.put(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE, "555-666-777");
 

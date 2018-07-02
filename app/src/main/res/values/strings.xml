@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">My Book Shop</string>
-    <string name="editor_label">Book Details</string>
     <string name="save">Save</string>
     <string name="action_insert_dummy_data">Insert Dummy Data</string>
     <string name="dummy_books_string">The books table contains</string>
@@ -22,4 +21,10 @@
     <string name="details">Details</string>
     <string name="quantity_label">Quantity:</string>
     <string name="price_label">Price:</string>
+    <string name="label_name">Name</string>
+    <string name="label_author">Author</string>
+    <string name="add_book">Add a book</string>
+    <string name="edit_book">Edit book details</string>
+    <string name="label_year">Year</string>
+    <string name="label_category">Category</string>
 </resources>

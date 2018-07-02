@@ -1,9 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_margin"
     tools:context=".EditorActivity">
+
+    <LinearLayout style="@style/EditorRowStyle">
+
+        <TextView
+            style="@style/EditorLabelStyle"
+            android:text="@string/label_name" />
+
+        <EditText
+            android:id="@+id/name"
+            style="@style/EditorFieldStyle"
+            android:hint="@string/label_name"
+            android:inputType="text" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/EditorRowStyle">
+
+        <TextView
+            style="@style/EditorLabelStyle"
+            android:text="@string/label_author" />
+
+        <EditText
+            android:id="@+id/author"
+            style="@style/EditorFieldStyle"
+            android:hint="@string/label_author"
+            android:inputType="text" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/EditorRowStyle">
+
+        <TextView
+            style="@style/EditorLabelStyle"
+            android:text="@string/label_year" />
+
+        <EditText
+            android:id="@+id/year"
+            android:maxLength="4"
+            style="@style/EditorFieldStyle"
+            android:hint="@string/label_year"
+            android:inputType="number" />
+    </LinearLayout>
+    <LinearLayout style="@style/EditorRowStyle">
+
+        <TextView
+            style="@style/EditorLabelStyle"
+            android:text="@string/label_category" />
+
+        <Spinner
+            android:id="@+id/category"
+            style="@style/EditorFieldStyle"
+            android:spinnerMode="dropdown"/>
+    </LinearLayout>
 
     <Button
         android:id="@+id/save_button"
@@ -11,4 +64,4 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save" />
-</RelativeLayout>
+</LinearLayout>

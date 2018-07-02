@@ -18,7 +18,6 @@
         </activity>
         <activity
             android:name=".EditorActivity"
-            android:label="@string/editor_label"
             android:parentActivityName=".CatalogActivity" />
 
         <provider
