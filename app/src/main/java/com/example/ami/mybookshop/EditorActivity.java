@@ -3,12 +3,14 @@ package com.example.ami.mybookshop;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -21,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ami.mybookshop.data.BookContract.BookEntry;
 
@@ -39,13 +42,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mSupplierNameEditText;
     private EditText mSupplierPhoneEditText;
 
-
     private ImageButton mMinusButton;
     private ImageButton mPlusButton;
     private int mEditorMode = Constants.DEFAULT_EDITOR_MODE;
     private static final int EXISTING_BOOK_LOADER = 0;
     private Uri mCurrentBookUri;
-    // todo: private boolean mBookHasChanged = false;
+    private boolean mBookHasChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mEditorMode = intent.getIntExtra(Constants.INTENT_EDIT_ITEM, Constants.DEFAULT_EDITOR_MODE);
         }
 
+        // Hide menu items according to the editor's mode
+        invalidateOptionsMenu();
+
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.name);
         mAuthorEditText = findViewById(R.id.author);
@@ -76,8 +81,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mMinusButton = findViewById(R.id.decrease);
         mPlusButton = findViewById(R.id.increase);
 
-        // Hide menu items according to the editor's mode
-        invalidateOptionsMenu();
+        mNameEditText.setOnTouchListener(mTouchListener);
+        mAuthorEditText.setOnTouchListener(mTouchListener);
+        mYearEditText.setOnTouchListener(mTouchListener);
+        mCategorySpinner.setOnTouchListener(mTouchListener);
+        mPriceEditText.setOnTouchListener(mTouchListener);
+        mQuantityEditText.setOnTouchListener(mTouchListener);
+        mSupplierNameEditText.setOnTouchListener(mTouchListener);
+        mSupplierPhoneEditText.setOnTouchListener(mTouchListener);
+
+        ImageButton orderButton = findViewById(R.id.order_button);
 
         String title = "";
         switch (mEditorMode) {
@@ -88,6 +101,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 // Prepare the loader. Either re-connect with an existing one,
                 // or start a new one.
                 getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
+                orderButton.setVisibility(View.VISIBLE);
                 break;
 
             // update existing book
@@ -99,6 +113,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // insert new book
             case Constants.MODE_INSERT:
                 title = getString(R.string.add_book);
+                mQuantityEditText.setText("0");
+                mMinusButton.setEnabled(false);
+                mMinusButton.setAlpha(0.25F);
                 break;
         }
         this.setTitle(title);
@@ -110,14 +127,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         setupSpinner();
 
         // Setup quantity increase/decrease buttons
-        // todo: show 0 if in insert mode
         ImageButton mMinusButton = findViewById(R.id.decrease);
         ImageButton mPlusButton = findViewById(R.id.increase);
         mMinusButton.setOnClickListener(quantityButtonListener);
         mPlusButton.setOnClickListener(quantityButtonListener);
 
         // Setup order button
-        ImageButton orderButton = findViewById(R.id.order_button);
+
         orderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,6 +258,54 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSupplierPhoneEditText.setText("");
     }
 
+    // OnTouchListener that listens for any user touches on a View, implying that they are modifying
+    // the view, and we change the mBookHasChanged boolean to true.
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            mBookHasChanged = true;
+            return false;
+        }
+    };
+
+    private void showUnsavedChangesDialog(DialogInterface.OnClickListener discardButtonClickListener) {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.unsaved_changes_dialog_msg);
+        builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+        builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Keep editing" button, so dismiss the dialog
+                // and continue editing the book.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handling unsaved changes
+        if (!mBookHasChanged) {
+            super.onBackPressed();
+            return;
+        }
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                };
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
     private void setupSpinner() {
         // Create adapter for spinner. The list options are from the String array it will use
         // the spinner will use the default layout
@@ -268,22 +332,34 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /**
-     * {link @View.OnClickListener} to monitor button clicks
+     * {link @View.OnClickListener} to monitor quantity increment/decrement button clicks
      */
     private View.OnClickListener quantityButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            // todo: disable below zero
             int quantity = 0;
             if (!TextUtils.isEmpty(mQuantityEditText.getText())) {
                 quantity = Integer.parseInt(mQuantityEditText.getText().toString());
             }
             switch (v.getId()) {
                 case R.id.decrease:
-                    quantity--;
+                    if (quantity > 0) {
+                        quantity--;
+                        if (quantity == 0) {
+                            mMinusButton.setEnabled(false);
+                            mMinusButton.setAlpha(0.25F);
+                        }
+                    } else {
+                        Toast.makeText(v.getContext(), getResources().getString(R.string.quantity_zero),
+                                Toast.LENGTH_SHORT).show();
+                    }
                     break;
                 case R.id.increase:
                     quantity++;
+                    if (quantity > 0) {
+                        mMinusButton.setEnabled(true);
+                        mMinusButton.setAlpha(1F);
+                    }
                     break;
             }
             mQuantityEditText.setText(String.valueOf(quantity));
@@ -305,11 +381,37 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Intent editIntent = new Intent(this, EditorActivity.class);
                 editIntent.setData(mCurrentBookUri);
                 editIntent.putExtra(Constants.INTENT_EDIT_ITEM, Constants.MODE_EDIT);
-                finish();
                 startActivity(editIntent);
                 return true;
             case R.id.action_cancel:
-                finish();
+                // Handle unsaved changes
+                if (!mBookHasChanged) {
+                    finish();
+                    return true;
+                }
+                DialogInterface.OnClickListener discardButtonClickListener =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        };
+                showUnsavedChangesDialog(discardButtonClickListener);
+                return true;
+            case android.R.id.home:
+                // Handle unsaved changes
+                if (!mBookHasChanged) {
+                    super.onBackPressed();
+                    return true;
+                }
+                DialogInterface.OnClickListener discardButtonClickListenerHome =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                EditorActivity.super.onBackPressed();
+                            }
+                        };
+                showUnsavedChangesDialog(discardButtonClickListenerHome);
                 return true;
         }
         return super.onOptionsItemSelected(item);
