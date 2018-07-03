@@ -7,4 +7,5 @@
     <dimen name="activity_margin">16dp</dimen>
 
     <dimen name="quantity_button">36dp</dimen>
+    <dimen name="activity_button">8dp</dimen>
 </resources>

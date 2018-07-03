@@ -2,8 +2,6 @@
     <string name="app_name">My Book Shop</string>
     <string name="save">Save</string>
     <string name="action_insert_dummy_data">Insert Dummy Data</string>
-    <!--<string name="dummy_books_string">The books table contains</string>-->
-    <!--<string name="dummy_books_string_end">books</string>-->
 
     <!-- Category spinner options -->
     <string name="category_general">General</string>
@@ -21,10 +19,11 @@
     <string name="details">Details</string>
 
     <string name="quantity_label">Quantity:</string>
-    <string name="price_label">Price:</string>
 
-    <string name="add_book">Add a book</string>
-    <string name="edit_book">Edit book details</string>
+    <!-- Editor activity titles -->
+    <string name="add_book">Add a Book</string>
+    <string name="edit_book">Edit Book</string>
+    <string name="book_details">Book Details</string>
 
     <!-- Labels for editor fields -->
     <string name="label_name">Name</string>
@@ -38,7 +37,6 @@
     <string name="label_supplier_name">Name</string>
     <string name="label_supplier_phone">Phone</string>
     <string name="supplier_details">Supplier Details</string>
-    <string name="book_details">Book Details</string>
     <string name="order">Order</string>
     <string name="action_save">Save</string>
     <string name="action_edit">Edit</string>
@@ -46,4 +44,6 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_about">About</string>
     <string name="view_book">Book Details</string>
+    <string name="increase">Increase</string>
+    <string name="decrease">Decrease</string>
 </resources>

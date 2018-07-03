@@ -26,6 +26,7 @@
 
     <!-- Style for an EditText field in the editor -->
     <style name="EditorFieldStyle">
+        <item name="android:textColor">@color/secondaryTextColor</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">4</item>
@@ -34,8 +35,9 @@
 
     <!-- Style for the quantity EditText field in the editor -->
     <style name="EditorFieldStyleQuantity">
+        <item name="android:textColor">@color/secondaryTextColor</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_width">60dp</item>
         <item name="android:textAppearance">?android:textAppearanceSmall</item>
     </style>
 
@@ -48,4 +50,18 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- Activity button -->
+    <style name="ActivityButton">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:padding">@dimen/activity_button</item>
+        <item name="android:background">?attr/actionBarItemBackground</item>
+    </style>
+
+    <style name="SpinnerStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/secondaryTextColor</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textAppearance">?android:textAppearanceSmall</item>
+    </style>
 </resources>

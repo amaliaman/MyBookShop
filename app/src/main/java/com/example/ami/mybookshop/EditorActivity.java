@@ -1,26 +1,30 @@
 package com.example.ami.mybookshop;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.ami.mybookshop.data.BookContract.BookEntry;
 
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Locale;
 
@@ -36,8 +40,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mSupplierPhoneEditText;
 
 
-    private Button mMinusButton;
-    private Button mPlusButton;
+    private ImageButton mMinusButton;
+    private ImageButton mPlusButton;
     private int mEditorMode = Constants.DEFAULT_EDITOR_MODE;
     private static final int EXISTING_BOOK_LOADER = 0;
     private Uri mCurrentBookUri;
@@ -72,57 +76,124 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mMinusButton = findViewById(R.id.decrease);
         mPlusButton = findViewById(R.id.increase);
 
+        // Hide menu items according to the editor's mode
+        invalidateOptionsMenu();
+
+        String title = "";
         switch (mEditorMode) {
             // view existing book
             case Constants.MODE_VIEW:
-                this.setTitle(getString(R.string.view_book));
-                // todo: extract to a separate function
-                mNameEditText.setEnabled(false);
-                mNameEditText.setTextColor(getResources().getColor(android.R.color.tertiary_text_dark));
-
-                mAuthorEditText.setEnabled(false);
-                mAuthorEditText.setTextColor(getResources().getColor(android.R.color.tertiary_text_dark));
-
-                mCategorySpinner.setEnabled(false);
-
-                mMinusButton.setVisibility(View.GONE);
-                mPlusButton.setVisibility(View.GONE);
-
+                title = getString(R.string.view_book);
+                disableInput();
+                // Prepare the loader. Either re-connect with an existing one,
+                // or start a new one.
+                getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
                 break;
+
             // update existing book
             case Constants.MODE_EDIT:
-                this.setTitle(getString(R.string.edit_book));
-                ///
+                title = getString(R.string.edit_book);
+                getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
                 break;
+
             // insert new book
             case Constants.MODE_INSERT:
-                this.setTitle(getString(R.string.add_book));
-                // Invalidate the options menu, so the "Delete" menu option can be hidden.
-                // (It doesn't make sense to delete a book that hasn't been created yet.)
-                //todo: invalidateOptionsMenu() for all relevant buttons in all modes;
+                title = getString(R.string.add_book);
                 break;
-            default:
-                //
         }
-
-        // Prepare the loader. Either re-connect with an existing one,
-        // or start a new one.
-        getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
-
+        this.setTitle(title);
 
         // Show currency symbol in Price field
         TextView priceLabel = findViewById(R.id.price_label);
         priceLabel.append(" (" + Currency.getInstance(Locale.getDefault()).getSymbol() + ")");
 
-
         setupSpinner();
 
         // Setup quantity increase/decrease buttons
         // todo: show 0 if in insert mode
-        Button mMinusButton = findViewById(R.id.decrease);
-        Button mPlusButton = findViewById(R.id.increase);
+        ImageButton mMinusButton = findViewById(R.id.decrease);
+        ImageButton mPlusButton = findViewById(R.id.increase);
         mMinusButton.setOnClickListener(quantityButtonListener);
         mPlusButton.setOnClickListener(quantityButtonListener);
+
+        // Setup order button
+        ImageButton orderButton = findViewById(R.id.order_button);
+        orderButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent orderIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" +
+                        mSupplierPhoneEditText.getText().toString()));
+                startActivity(orderIntent);
+            }
+        });
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // Hide menu items according to the editor's mode
+        switch (mEditorMode) {
+            case Constants.MODE_VIEW:
+                MenuItem saveItem = menu.findItem(R.id.action_save);
+                MenuItem cancelItem = menu.findItem(R.id.action_cancel);
+                saveItem.setVisible(false);
+                cancelItem.setVisible(false);
+                break;
+
+            case Constants.MODE_EDIT:
+                // same as next case
+            case Constants.MODE_INSERT:
+                MenuItem editItem = menu.findItem(R.id.action_edit);
+                MenuItem deleteItem = menu.findItem(R.id.action_delete);
+                editItem.setVisible(false);
+                deleteItem.setVisible(false);
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
+    /**
+     * Disable all input controls in activity when in view mode
+     */
+    private void disableInput() {
+        ArrayList<EditText> editTexts = new ArrayList<>();
+        editTexts.add(mNameEditText);
+        editTexts.add(mAuthorEditText);
+        editTexts.add(mYearEditText);
+        editTexts.add(mPriceEditText);
+        editTexts.add(mQuantityEditText);
+        editTexts.add(mSupplierNameEditText);
+        editTexts.add(mSupplierPhoneEditText);
+
+        for (EditText et : editTexts) {
+            et.setEnabled(false);
+            et.setTextColor(getResources().getColor(R.color.secondaryTextColor));
+            et.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        }
+
+        mCategorySpinner.setEnabled(false);
+
+        mMinusButton.setVisibility(View.GONE);
+        mPlusButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -175,7 +246,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // Create adapter for spinner. The list options are from the String array it will use
         // the spinner will use the default layout
         ArrayAdapter categorySpinnerAdapter = ArrayAdapter.createFromResource(this,
-                R.array.array_category_options, android.R.layout.simple_spinner_item);
+                R.array.array_category_options, R.layout.spinner_item);
 
         // Specify dropdown layout style - simple list view with 1 item per line
         categorySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -184,19 +255,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mCategorySpinner.setAdapter(categorySpinnerAdapter);
 
         // Set the integer mSelected to the constant values
-        mCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selection = (String) parent.getItemAtPosition(position);
-                if (!TextUtils.isEmpty(selection)) {
-                }
-            }
-
-            // Because AdapterView is an abstract class, onNothingSelected must be defined
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+//        mCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//            }
+//
+//            // Because AdapterView is an abstract class, onNothingSelected must be defined
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//            }
+//        });
     }
 
     /**

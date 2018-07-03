@@ -48,14 +48,11 @@
             tools:text="20" />
     </LinearLayout>
 
-
     <ImageView
         android:id="@+id/sale_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/ActivityButton"
         android:layout_alignParentEnd="true"
         android:contentDescription="@string/sale"
-        android:padding="8dp"
         android:src="@drawable/ic_shop" />
 
 </RelativeLayout>
