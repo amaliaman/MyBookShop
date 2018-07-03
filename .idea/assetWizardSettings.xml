@@ -90,7 +90,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_assignment_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_add_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -100,8 +100,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_details" />
+                            <entry key="color" value="ad1457" />
+                            <entry key="outputName" value="ic_plus" />
                             <entry key="sourceFile" value="C:\Users\Ami\Desktop\806147-literature\806147-literature\svg\010-basket.svg" />
                           </map>
                         </option>

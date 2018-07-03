@@ -15,8 +15,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.ami.mybookshop.data.BookContract.BookEntry;
+
+import java.util.Currency;
+import java.util.Locale;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -24,7 +28,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mAuthorEditText;
     private EditText mYearEditText;
     private Spinner mCategorySpinner;
+    private EditText mPriceEditText;
+    private EditText mQuantityEditText;
 
+    private int quantity;
     private int mCategory = 0;
     private static final int EXISTING_BOOK_LOADER = 0;
     private Uri mCurrentBookUri;
@@ -61,15 +68,27 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             invalidateOptionsMenu();
         }
 
+        // Show currency symbol in Price field
+        TextView priceLabel = findViewById(R.id.price_label);
+        priceLabel.append(" (" + Currency.getInstance(Locale.getDefault()).getSymbol() + ")");
+
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.name);
         mAuthorEditText = findViewById(R.id.author);
         mYearEditText = findViewById(R.id.year);
         mCategorySpinner = findViewById(R.id.category);
+        mPriceEditText = findViewById(R.id.price);
+        mQuantityEditText = findViewById(R.id.quantity);
 
         setupSpinner();
-    }
 
+        // Setup quantity increase/decrease buttons
+        // todo: show 0 if in insert mode
+        Button mMinusButton = findViewById(R.id.decrease);
+        Button mPlusButton = findViewById(R.id.increase);
+        mMinusButton.setOnClickListener(quantityButtonListener);
+        mPlusButton.setOnClickListener(quantityButtonListener);
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -98,6 +117,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mAuthorEditText.setText(data.getString(data.getColumnIndex(BookEntry.COLUMN_BOOK_AUTHOR)));
             mYearEditText.setText(String.valueOf(data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_YEAR))));
             mCategorySpinner.setSelection(data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_CATEGORY)));
+            mPriceEditText.setText(String.valueOf(data.getDouble(data.getColumnIndex(BookEntry.COLUMN_BOOK_PRICE))));
+            mQuantityEditText.setText(String.valueOf(data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_QUANTITY))));
         }
     }
 
@@ -107,6 +128,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mAuthorEditText.setText("");
         mYearEditText.setText("");
         mCategorySpinner.setSelection(0);
+        mPriceEditText.setText("");
+        mQuantityEditText.setText("");
     }
 
     private void setupSpinner() {
@@ -116,7 +139,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 R.array.array_category_options, android.R.layout.simple_spinner_item);
 
         // Specify dropdown layout style - simple list view with 1 item per line
-        categorySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        categorySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // Apply the adapter to the spinner
         mCategorySpinner.setAdapter(categorySpinnerAdapter);
@@ -138,4 +161,28 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
     }
+
+    /**
+     * {link @View.OnClickListener} to monitor button clicks
+     */
+    private View.OnClickListener quantityButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // todo: disable below zero
+            if (TextUtils.isEmpty(mQuantityEditText.getText())) {
+                quantity = 0;
+            } else {
+                quantity = Integer.parseInt(mQuantityEditText.getText().toString());
+            }
+            switch (v.getId()) {
+                case R.id.decrease:
+                    quantity--;
+                    break;
+                case R.id.increase:
+                    quantity++;
+                    break;
+            }
+            mQuantityEditText.setText(String.valueOf(quantity));
+        }
+    };
 }
