@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,47 +32,32 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Spinner mCategorySpinner;
     private EditText mPriceEditText;
     private EditText mQuantityEditText;
+    private EditText mSupplierNameEditText;
+    private EditText mSupplierPhoneEditText;
 
-    private int quantity;
-    private int mCategory = 0;
+
+    private Button mMinusButton;
+    private Button mPlusButton;
+    private int mEditorMode = Constants.DEFAULT_EDITOR_MODE;
     private static final int EXISTING_BOOK_LOADER = 0;
     private Uri mCurrentBookUri;
-    private boolean mBookHasChanged = false;
+    // todo: private boolean mBookHasChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        // Setup Save button
-        Button saveButton = findViewById(R.id.save_button);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-
+        // Determine the current mode - inset, view or edit
         Intent intent = getIntent();
         mCurrentBookUri = intent.getData();
-
-        if (mCurrentBookUri != null) {
-            // update existing book
-            this.setTitle(getString(R.string.edit_book));
-            // Prepare the loader. Either re-connect with an existing one,
-            // or start a new one.
-            getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
-        } else {
-            // insert new book
-            this.setTitle(getString(R.string.add_book));
-            // Invalidate the options menu, so the "Delete" menu option can be hidden.
-            // (It doesn't make sense to delete a book that hasn't been created yet.)
-            invalidateOptionsMenu();
+        if (intent.hasExtra(Constants.INTENT_VIEW_ITEM)) {
+            mEditorMode = intent.getIntExtra(Constants.INTENT_VIEW_ITEM, Constants.DEFAULT_EDITOR_MODE);
+        } else if (intent.hasExtra(Constants.INTENT_EDIT_ITEM)) {
+            mEditorMode = intent.getIntExtra(Constants.INTENT_EDIT_ITEM, Constants.DEFAULT_EDITOR_MODE);
+        } else if (intent.hasExtra(Constants.INTENT_ADD_ITEM)) {
+            mEditorMode = intent.getIntExtra(Constants.INTENT_EDIT_ITEM, Constants.DEFAULT_EDITOR_MODE);
         }
-
-        // Show currency symbol in Price field
-        TextView priceLabel = findViewById(R.id.price_label);
-        priceLabel.append(" (" + Currency.getInstance(Locale.getDefault()).getSymbol() + ")");
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.name);
@@ -79,6 +66,54 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mCategorySpinner = findViewById(R.id.category);
         mPriceEditText = findViewById(R.id.price);
         mQuantityEditText = findViewById(R.id.quantity);
+        mSupplierNameEditText = findViewById(R.id.supplier_name);
+        mSupplierPhoneEditText = findViewById(R.id.supplier_phone);
+
+        mMinusButton = findViewById(R.id.decrease);
+        mPlusButton = findViewById(R.id.increase);
+
+        switch (mEditorMode) {
+            // view existing book
+            case Constants.MODE_VIEW:
+                this.setTitle(getString(R.string.view_book));
+                // todo: extract to a separate function
+                mNameEditText.setEnabled(false);
+                mNameEditText.setTextColor(getResources().getColor(android.R.color.tertiary_text_dark));
+
+                mAuthorEditText.setEnabled(false);
+                mAuthorEditText.setTextColor(getResources().getColor(android.R.color.tertiary_text_dark));
+
+                mCategorySpinner.setEnabled(false);
+
+                mMinusButton.setVisibility(View.GONE);
+                mPlusButton.setVisibility(View.GONE);
+
+                break;
+            // update existing book
+            case Constants.MODE_EDIT:
+                this.setTitle(getString(R.string.edit_book));
+                ///
+                break;
+            // insert new book
+            case Constants.MODE_INSERT:
+                this.setTitle(getString(R.string.add_book));
+                // Invalidate the options menu, so the "Delete" menu option can be hidden.
+                // (It doesn't make sense to delete a book that hasn't been created yet.)
+                //todo: invalidateOptionsMenu() for all relevant buttons in all modes;
+                break;
+            default:
+                //
+        }
+
+        // Prepare the loader. Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
+
+
+        // Show currency symbol in Price field
+        TextView priceLabel = findViewById(R.id.price_label);
+        priceLabel.append(" (" + Currency.getInstance(Locale.getDefault()).getSymbol() + ")");
+
 
         setupSpinner();
 
@@ -119,6 +154,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mCategorySpinner.setSelection(data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_CATEGORY)));
             mPriceEditText.setText(String.valueOf(data.getDouble(data.getColumnIndex(BookEntry.COLUMN_BOOK_PRICE))));
             mQuantityEditText.setText(String.valueOf(data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_QUANTITY))));
+            mSupplierNameEditText.setText(data.getString(data.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_NAME)));
+            mSupplierPhoneEditText.setText(data.getString(data.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE)));
         }
     }
 
@@ -130,6 +167,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mCategorySpinner.setSelection(0);
         mPriceEditText.setText("");
         mQuantityEditText.setText("");
+        mSupplierNameEditText.setText("");
+        mSupplierPhoneEditText.setText("");
     }
 
     private void setupSpinner() {
@@ -150,14 +189,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selection = (String) parent.getItemAtPosition(position);
                 if (!TextUtils.isEmpty(selection)) {
-                    mCategory = position;
                 }
             }
 
             // Because AdapterView is an abstract class, onNothingSelected must be defined
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                mCategory = 0; // Unknown
             }
         });
     }
@@ -169,9 +206,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         @Override
         public void onClick(View v) {
             // todo: disable below zero
-            if (TextUtils.isEmpty(mQuantityEditText.getText())) {
-                quantity = 0;
-            } else {
+            int quantity = 0;
+            if (!TextUtils.isEmpty(mQuantityEditText.getText())) {
                 quantity = Integer.parseInt(mQuantityEditText.getText().toString());
             }
             switch (v.getId()) {
@@ -185,4 +221,29 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mQuantityEditText.setText(String.valueOf(quantity));
         }
     };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu options from the res/menu/menu_editor.xml file.
+        // This adds menu items to the app bar.
+        getMenuInflater().inflate(R.menu.menu_editor, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_edit:
+                Intent editIntent = new Intent(this, EditorActivity.class);
+                editIntent.setData(mCurrentBookUri);
+                editIntent.putExtra(Constants.INTENT_EDIT_ITEM, Constants.MODE_EDIT);
+                finish();
+                startActivity(editIntent);
+                return true;
+            case R.id.action_cancel:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

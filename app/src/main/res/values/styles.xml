@@ -39,4 +39,13 @@
         <item name="android:textAppearance">?android:textAppearanceSmall</item>
     </style>
 
+    <!-- Style for a heading in the editor -->
+    <style name="EditorHeadingStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/primaryDarkColor</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>
