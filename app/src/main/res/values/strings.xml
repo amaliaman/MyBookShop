@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">My Book Shop</string>
     <string name="save">Save</string>
-    <string name="action_insert_dummy_data">Insert Dummy Data</string>
+    <string name="action_insert_dummy_data">Insert dummy data</string>
 
     <!-- Category spinner options -->
     <string name="category_general">General</string>

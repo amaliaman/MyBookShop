@@ -47,22 +47,12 @@
             android:fontFamily="sans-serif"
             android:paddingTop="@dimen/default_padding"
             android:text="@string/empty_view_subtitle_text"
-            android:textAppearance="?android:textAppearanceSmall"
-            android:textColor="#A2AAB0" />
+            android:textAppearance="?android:textAppearanceSmall" />
     </RelativeLayout>
 
     <ListView
         android:id="@+id/book_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add" />
 
 </RelativeLayout>
