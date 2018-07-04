@@ -101,7 +101,7 @@
     <!-- Strings For Order By Preference [CHAR LIMIT=30] -->
     <string name="settings_order_by_label">Order By</string>
     <string name="settings_order_by_key" translatable="false">order_by</string>
-    <string name="settings_order_by_default" translatable="false">@string/settings_order_by_year_asc_value</string>
+    <string name="settings_order_by_default" translatable="false">@string/settings_order_by_name_asc_value</string>
 
     <!-- Label for order_by year asc option [CHAR LIMIT=20] -->
     <string name="settings_order_by_year_asc_label">Year (ascending)</string>

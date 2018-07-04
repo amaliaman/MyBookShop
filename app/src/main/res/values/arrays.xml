@@ -14,16 +14,16 @@
 
     <!-- Order By preferences -->
     <string-array name="settings_order_by_labels">
-        <item>@string/settings_order_by_year_asc_label</item>
-        <item>@string/settings_order_by_year_desc_label</item>
         <item>@string/settings_order_by_name_asc_label</item>
         <item>@string/settings_order_by_name_desc_label</item>
+        <item>@string/settings_order_by_year_asc_label</item>
+        <item>@string/settings_order_by_year_desc_label</item>
     </string-array>
 
     <string-array name="settings_order_by_values">
-        <item>@string/settings_order_by_year_asc_value</item>
-        <item>@string/settings_order_by_year_desc_value</item>
         <item>@string/settings_order_by_name_asc_value</item>
         <item>@string/settings_order_by_name_desc_value</item>
+        <item>@string/settings_order_by_year_asc_value</item>
+        <item>@string/settings_order_by_year_desc_value</item>
     </string-array>
 </resources>
