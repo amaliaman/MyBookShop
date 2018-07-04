@@ -12,6 +12,11 @@
             android:icon="@drawable/ic_about"
             android:title="@string/action_about"
             app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/action_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settings_menu_item"
+            app:showAsAction="ifRoom" />
     </group>
     <group>
         <item android:title="@string/developer_options">

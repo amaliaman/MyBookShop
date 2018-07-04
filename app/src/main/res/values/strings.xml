@@ -15,7 +15,7 @@
     <!--/-->
 
     <string name="empty_view_title_text">No books in this shop…</string>
-    <string name="empty_view_subtitle_text">Click the button below to add some books</string>
+    <string name="empty_view_subtitle_text">Click the button above to add some books</string>
     <string name="sale">Sale</string>
     <string name="details">Details</string>
 
@@ -97,4 +97,28 @@
     <string name="editor_delete_book_successful_all">All books deleted</string>
     <string name="editor_delete_book_failed_all">Error deleting all books</string>
     <string name="required_message">Field is required</string>
+
+    <!-- Strings For Order By Preference [CHAR LIMIT=30] -->
+    <string name="settings_order_by_label">Order By</string>
+    <string name="settings_order_by_key" translatable="false">order_by</string>
+    <string name="settings_order_by_default" translatable="false">@string/settings_order_by_year_asc_value</string>
+
+    <!-- Label for order_by year asc option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_year_asc_label">Year (ascending)</string>
+    <string name="settings_order_by_year_asc_value" translatable="false">year</string>
+
+    <!-- Label for order_by year desc option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_year_desc_label">Year (descending)</string>
+    <string name="settings_order_by_year_desc_value" translatable="false">year DESC</string>
+
+    <!-- Label for order_by book name asc option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_name_asc_label">Name (ascending)</string>
+    <string name="settings_order_by_name_asc_value" translatable="false">name COLLATE NOCASE</string>
+
+    <!-- Label for order_by book name desc option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_name_desc_label">Name (descending)</string>
+    <string name="settings_order_by_name_desc_value" translatable="false">name COLLATE NOCASE DESC</string>
+
+    <string name="settings_menu_item">Settings</string>
+    <string name="settings_title">Settings</string>
 </resources>
