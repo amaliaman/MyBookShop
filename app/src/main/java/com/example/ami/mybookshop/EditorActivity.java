@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ami.mybookshop.data.BookContract.BookEntry;
+import com.example.ami.mybookshop.data.Constants;
 
 import java.util.ArrayList;
 import java.util.Currency;
@@ -79,6 +80,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      * Track changes to controls
      */
     private boolean mBookHasChanged = false;
+
+    private int mQuantity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +144,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case MODE_EDIT:
                 title = getString(R.string.edit_book);
                 getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
+                if (mQuantity == 0) {
+                    mMinusButton.setEnabled(false);
+                    mMinusButton.setAlpha(Constants.DISABLED_ALPHA);
+                }
                 break;
 
             // insert new book
@@ -148,7 +155,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 title = getString(R.string.add_book);
                 mQuantityEditText.setText("0");
                 mMinusButton.setEnabled(false);
-                mMinusButton.setAlpha(0.25F);
+                mMinusButton.setAlpha(Constants.DISABLED_ALPHA);
                 break;
         }
         this.setTitle(title);
@@ -277,6 +284,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mQuantityEditText.setText(String.valueOf(data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_QUANTITY))));
             mSupplierNameEditText.setText(data.getString(data.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_NAME)));
             mSupplierPhoneEditText.setText(data.getString(data.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE)));
+
+            mQuantity = data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_QUANTITY));
         }
     }
 
@@ -290,6 +299,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setText("");
         mSupplierNameEditText.setText("");
         mSupplierPhoneEditText.setText("");
+
+        mQuantity = 0;
     }
 
     // OnTouchListener that listens for any user touches on a View, implying that they are modifying
@@ -369,7 +380,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         quantity--;
                         if (quantity == 0) {
                             mMinusButton.setEnabled(false);
-                            mMinusButton.setAlpha(0.25F);
+                            mMinusButton.setAlpha(Constants.DISABLED_ALPHA);
                         }
                     } else {
                         Toast.makeText(v.getContext(), getResources().getString(R.string.quantity_zero),

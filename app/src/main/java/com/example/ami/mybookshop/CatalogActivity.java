@@ -41,12 +41,11 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         });
 
         // Find ListView to populate
-        ListView bookListView = findViewById(R.id.book_list);
+        final ListView bookListView = findViewById(R.id.book_list);
 
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
         bookListView.setEmptyView(emptyView);
-        // todo: show/hide empty text view when data loaded
 
         // Setup cursor adapter using cursor from last step
         mBooksAdapter = new BookCursorAdapter(this, null);
@@ -58,11 +57,11 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // or start a new one.
         getLoaderManager().initLoader(BOOK_LOADER, null, this);
 
-        // Setup list item click to go to details activity
+        // Respond to clicks on item
         bookListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent viewIntent = new Intent(CatalogActivity.this, EditorActivity.class);
+                Intent viewIntent = new Intent(view.getContext(), EditorActivity.class);
                 Uri currentBookUri = ContentUris.withAppendedId(BookEntry.CONTENT_URI, id);
                 viewIntent.setData(currentBookUri);
                 viewIntent.putExtra(EditorActivity.INTENT_VIEW_ITEM, EditorActivity.MODE_VIEW);
@@ -94,9 +93,21 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             case R.id.action_about:
                 Toast.makeText(this, getResources().getString(R.string.credit_icons), Toast.LENGTH_LONG).show();
                 return true;
-                // todo: delete all button
+            // "Delete all books" button
+            case R.id.action_delete_all:
+                deleteAllBooks();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteAllBooks() {
+        int mRowsDeleted = getContentResolver().delete(BookEntry.CONTENT_URI, null, null);
+        if (mRowsDeleted > 0) {
+            Toast.makeText(this, R.string.editor_delete_book_successful_all, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.editor_delete_book_failed_all, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -109,7 +120,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         values.put(BookEntry.COLUMN_BOOK_AUTHOR, "Jerome K. Jerome");
         values.put(BookEntry.COLUMN_BOOK_YEAR, 1889);
         values.put(BookEntry.COLUMN_BOOK_CATEGORY, 1);
-        values.put(BookEntry.COLUMN_BOOK_PRICE, 7.99);
+        values.put(BookEntry.COLUMN_BOOK_PRICE, 17.99);
         values.put(BookEntry.COLUMN_BOOK_QUANTITY, 44);
         values.put(BookEntry.COLUMN_BOOK_SUPPLIER_NAME, "BooksRUs");
         values.put(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE, "555-666-777");
@@ -125,7 +136,6 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-
 
     // Called when a new Loader needs to be created
     @Override

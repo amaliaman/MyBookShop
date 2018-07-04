@@ -143,12 +143,8 @@ public class BookProvider extends ContentProvider {
      * for that specific row in the database.
      */
     private Uri insertBook(Uri uri, ContentValues values) {
-        // Check that the name is not null
-        String name = values.getAsString(BookEntry.COLUMN_BOOK_NAME);
-        if (name == null || TextUtils.isEmpty(name)) {
-            throw new IllegalArgumentException("Book requires a name");
-        }
-        // todo: validity checks
+        // Validate user input
+        validateFields(values);
 
         // Get readable database
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
@@ -162,6 +158,41 @@ public class BookProvider extends ContentProvider {
 
         // Return the new URI with the ID (of the newly inserted row) appended at the end
         return ContentUris.withAppendedId(uri, id);
+    }
+
+    private void validateFields(ContentValues values) {
+        // Don't validate when updating quantity by sale button
+        if (values.size() > 1) {
+            String name = values.getAsString(BookEntry.COLUMN_BOOK_NAME);
+            if (TextUtils.isEmpty(name)) {
+                throw new IllegalArgumentException(BookEntry.COLUMN_BOOK_NAME + " is required");
+            }
+
+            String author = values.getAsString(BookEntry.COLUMN_BOOK_AUTHOR);
+            if (TextUtils.isEmpty(author)) {
+                throw new IllegalArgumentException(BookEntry.COLUMN_BOOK_AUTHOR + " is required");
+            }
+
+            String price = values.getAsString(BookEntry.COLUMN_BOOK_PRICE);
+            if (TextUtils.isEmpty(price) || Double.parseDouble(price) < 0) {
+                throw new IllegalArgumentException(BookEntry.COLUMN_BOOK_PRICE + " is not valid");
+            }
+
+            String quantity = values.getAsString(BookEntry.COLUMN_BOOK_QUANTITY);
+            if (TextUtils.isEmpty(quantity) || Integer.parseInt(quantity) < 0) {
+                throw new IllegalArgumentException(BookEntry.COLUMN_BOOK_QUANTITY + " is not valid");
+            }
+
+            String supplierName = values.getAsString(BookEntry.COLUMN_BOOK_SUPPLIER_NAME);
+            if (TextUtils.isEmpty(supplierName)) {
+                throw new IllegalArgumentException(BookEntry.COLUMN_BOOK_SUPPLIER_NAME + " is required");
+            }
+
+            String supplierPhone = values.getAsString(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE);
+            if (TextUtils.isEmpty(supplierPhone)) {
+                throw new IllegalArgumentException(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE + " is required");
+            }
+        }
     }
 
     @Override
@@ -226,15 +257,8 @@ public class BookProvider extends ContentProvider {
             return 0;
         }
 
-        // Check that the name is not null
-        if (values.containsKey(BookEntry.COLUMN_BOOK_NAME)) {
-            String name = values.getAsString(BookEntry.COLUMN_BOOK_NAME);
-            if (name == null || TextUtils.isEmpty(name)) {
-                throw new IllegalArgumentException("Book requires a name");
-            }
-        }
-
-        // todo: data validation
+        // Validate user input
+        validateFields(values);
 
         // Get writable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();

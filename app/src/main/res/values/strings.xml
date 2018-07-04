@@ -15,7 +15,7 @@
     <!--/-->
 
     <string name="empty_view_title_text">No books in this shop…</string>
-    <string name="empty_view_subtitle_text">Add some books</string>
+    <string name="empty_view_subtitle_text">Click the button below to add some books</string>
     <string name="sale">Sale</string>
     <string name="details">Details</string>
 
@@ -78,10 +78,10 @@
     <string name="fill_fields">Please fill all the fields</string>
 
     <!-- Toast message in editor when current book was successfully deleted [CHAR LIMIT=NONE] -->
-    <string name="editor_delete_book_successful">Book deleted</string>
+    <string name="editor_delete_book_successful">Book deleted successfully</string>
 
     <!-- Toast message in editor when current book has failed to be deleted [CHAR LIMIT=NONE] -->
-    <string name="editor_delete_book_failed">Error with deleting book</string>
+    <string name="editor_delete_book_failed">Error deleting book</string>
 
     <!-- Dialog message to ask the user to confirm deleting the current book [CHAR LIMIT=NONE] -->
     <string name="delete_dialog_msg">Delete this book?</string>
@@ -94,4 +94,6 @@
 
     <string name="success_edit">Book updated successfully</string>
     <string name="error_edit">Error updating book</string>
+    <string name="editor_delete_book_successful_all">All books deleted</string>
+    <string name="editor_delete_book_failed_all">Error deleting all books</string>
 </resources>
