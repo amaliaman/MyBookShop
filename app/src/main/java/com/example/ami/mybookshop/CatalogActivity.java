@@ -65,7 +65,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 Intent viewIntent = new Intent(CatalogActivity.this, EditorActivity.class);
                 Uri currentBookUri = ContentUris.withAppendedId(BookEntry.CONTENT_URI, id);
                 viewIntent.setData(currentBookUri);
-                viewIntent.putExtra(Constants.INTENT_VIEW_ITEM, Constants.MODE_VIEW);
+                viewIntent.putExtra(EditorActivity.INTENT_VIEW_ITEM, EditorActivity.MODE_VIEW);
                 startActivity(viewIntent);
             }
         });
@@ -86,10 +86,15 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            // Respond to a click on the "Insert dummy data" menu option
+            // "Insert dummy data" button
             case R.id.action_insert_dummy_data:
                 insertDummyBook();
                 return true;
+            // About button
+            case R.id.action_about:
+                Toast.makeText(this, getResources().getString(R.string.credit_icons), Toast.LENGTH_LONG).show();
+                return true;
+                // todo: delete all button
         }
         return super.onOptionsItemSelected(item);
     }

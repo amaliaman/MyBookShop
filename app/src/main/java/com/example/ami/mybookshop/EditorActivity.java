@@ -1,6 +1,7 @@
 package com.example.ami.mybookshop;
 
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -33,6 +34,22 @@ import java.util.Locale;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    /**
+     * Editor constants
+     */
+    // Available EditorActivity modes
+    public static final int MODE_INSERT = 0;
+    public static final int MODE_EDIT = 1;
+    public static final int MODE_VIEW = 2;
+    // Default editor mode
+    public static final int DEFAULT_EDITOR_MODE = MODE_INSERT;
+    // Unique name for edit item intent
+    public static final String INTENT_VIEW_ITEM = "com.example.ami.mybookshop.INTENT_VIEW_ITEM";
+    public static final String INTENT_EDIT_ITEM = "com.example.ami.mybookshop.INTENT_EDIT_ITEM";
+    public static final String INTENT_ADD_ITEM = "com.example.ami.mybookshop.INTENT_ADD_ITEM";
+    /**
+     * User input controls in layout
+     */
     private EditText mNameEditText;
     private EditText mAuthorEditText;
     private EditText mYearEditText;
@@ -41,12 +58,26 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mQuantityEditText;
     private EditText mSupplierNameEditText;
     private EditText mSupplierPhoneEditText;
-
+    /**
+     * Buttons in layout
+     */
     private ImageButton mMinusButton;
     private ImageButton mPlusButton;
-    private int mEditorMode = Constants.DEFAULT_EDITOR_MODE;
+    /**
+     * Default editor mode
+     */
+    private int mEditorMode = DEFAULT_EDITOR_MODE;
+    /**
+     * Cursor loader ID
+     */
     private static final int EXISTING_BOOK_LOADER = 0;
+    /**
+     * URI of current book when in edit/view mode
+     */
     private Uri mCurrentBookUri;
+    /**
+     * Track changes to controls
+     */
     private boolean mBookHasChanged = false;
 
     @Override
@@ -57,12 +88,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // Determine the current mode - inset, view or edit
         Intent intent = getIntent();
         mCurrentBookUri = intent.getData();
-        if (intent.hasExtra(Constants.INTENT_VIEW_ITEM)) {
-            mEditorMode = intent.getIntExtra(Constants.INTENT_VIEW_ITEM, Constants.DEFAULT_EDITOR_MODE);
-        } else if (intent.hasExtra(Constants.INTENT_EDIT_ITEM)) {
-            mEditorMode = intent.getIntExtra(Constants.INTENT_EDIT_ITEM, Constants.DEFAULT_EDITOR_MODE);
-        } else if (intent.hasExtra(Constants.INTENT_ADD_ITEM)) {
-            mEditorMode = intent.getIntExtra(Constants.INTENT_EDIT_ITEM, Constants.DEFAULT_EDITOR_MODE);
+        if (intent.hasExtra(INTENT_VIEW_ITEM)) {
+            mEditorMode = intent.getIntExtra(INTENT_VIEW_ITEM, DEFAULT_EDITOR_MODE);
+        } else if (intent.hasExtra(INTENT_EDIT_ITEM)) {
+            mEditorMode = intent.getIntExtra(INTENT_EDIT_ITEM, DEFAULT_EDITOR_MODE);
+        } else if (intent.hasExtra(INTENT_ADD_ITEM)) {
+            mEditorMode = intent.getIntExtra(INTENT_EDIT_ITEM, DEFAULT_EDITOR_MODE);
         }
 
         // Hide menu items according to the editor's mode
@@ -89,13 +120,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mSupplierNameEditText.setOnTouchListener(mTouchListener);
         mSupplierPhoneEditText.setOnTouchListener(mTouchListener);
+        mMinusButton.setOnTouchListener(mTouchListener);
+        mPlusButton.setOnTouchListener(mTouchListener);
 
         ImageButton orderButton = findViewById(R.id.order_button);
 
         String title = "";
         switch (mEditorMode) {
             // view existing book
-            case Constants.MODE_VIEW:
+            case MODE_VIEW:
                 title = getString(R.string.view_book);
                 disableInput();
                 // Prepare the loader. Either re-connect with an existing one,
@@ -105,13 +138,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 break;
 
             // update existing book
-            case Constants.MODE_EDIT:
+            case MODE_EDIT:
                 title = getString(R.string.edit_book);
                 getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
                 break;
 
             // insert new book
-            case Constants.MODE_INSERT:
+            case MODE_INSERT:
                 title = getString(R.string.add_book);
                 mQuantityEditText.setText("0");
                 mMinusButton.setEnabled(false);
@@ -149,16 +182,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         super.onPrepareOptionsMenu(menu);
         // Hide menu items according to the editor's mode
         switch (mEditorMode) {
-            case Constants.MODE_VIEW:
+            case MODE_VIEW:
                 MenuItem saveItem = menu.findItem(R.id.action_save);
                 MenuItem cancelItem = menu.findItem(R.id.action_cancel);
                 saveItem.setVisible(false);
                 cancelItem.setVisible(false);
                 break;
 
-            case Constants.MODE_EDIT:
+            case MODE_EDIT:
                 // same as next case
-            case Constants.MODE_INSERT:
+            case MODE_INSERT:
                 MenuItem editItem = menu.findItem(R.id.action_edit);
                 MenuItem deleteItem = menu.findItem(R.id.action_delete);
                 editItem.setVisible(false);
@@ -207,6 +240,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
 
         mCategorySpinner.setEnabled(false);
+        mCategorySpinner.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         mMinusButton.setVisibility(View.GONE);
         mPlusButton.setVisibility(View.GONE);
@@ -317,18 +351,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // Apply the adapter to the spinner
         mCategorySpinner.setAdapter(categorySpinnerAdapter);
-
-        // Set the integer mSelected to the constant values
-//        mCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//            }
-//
-//            // Because AdapterView is an abstract class, onNothingSelected must be defined
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//            }
-//        });
     }
 
     /**
@@ -380,8 +402,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_edit:
                 Intent editIntent = new Intent(this, EditorActivity.class);
                 editIntent.setData(mCurrentBookUri);
-                editIntent.putExtra(Constants.INTENT_EDIT_ITEM, Constants.MODE_EDIT);
+                editIntent.putExtra(INTENT_EDIT_ITEM, MODE_EDIT);
                 startActivity(editIntent);
+                return true;
+            case R.id.action_save:
+                if (saveBook()) {
+                    finish();
+                }
+                return true;
+            case R.id.action_delete:
+                showDeleteConfirmationDialog();
                 return true;
             case R.id.action_cancel:
                 // Handle unsaved changes
@@ -415,5 +445,129 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the book.
+                deleteBook();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the book.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Perform the deletion of the book in the database.
+     */
+    private void deleteBook() {
+        if (mEditorMode == MODE_VIEW) {
+            // delete existing book
+            int mRowsDeleted = getContentResolver().delete(
+                    mCurrentBookUri,   // the user dictionary content URI
+                    null,                    // the column to select on
+                    null                      // the value to compare to
+            );
+            if (mRowsDeleted > 0) {
+                Toast.makeText(this, R.string.editor_delete_book_successful, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, R.string.editor_delete_book_failed, Toast.LENGTH_SHORT).show();
+            }
+            finish();
+        }
+    }
+
+    private boolean saveBook() {
+        // Retrieve values from controls
+        String nameValue = mNameEditText.getText().toString().trim();
+        String authorValue = mAuthorEditText.getText().toString().trim();
+
+        int yearValue = 0;
+        String yearRaw = mYearEditText.getText().toString().trim();
+        if (!TextUtils.isEmpty(yearRaw)) {
+            yearValue = Integer.parseInt(yearRaw);
+        }
+
+        int categoryValue = mCategorySpinner.getSelectedItemPosition();
+
+        double priceValue = 0;
+        String priceRaw = mPriceEditText.getText().toString().trim();
+        if (!TextUtils.isEmpty(priceRaw)) {
+            priceValue = Double.parseDouble(priceRaw);
+        }
+
+        int quantityValue = 0;
+        String quantityRaw = mQuantityEditText.getText().toString().trim();
+        if (!TextUtils.isEmpty(quantityRaw)) {
+            quantityValue = Integer.parseInt(quantityRaw);
+        }
+
+        String supplierNameValue = mSupplierNameEditText.getText().toString().trim();
+        String supplierPhoneValue = mSupplierPhoneEditText.getText().toString().trim();
+
+        // Check that all fields are filled
+        boolean isBookValid = true;
+        if (TextUtils.isEmpty(nameValue) && TextUtils.isEmpty(authorValue) &&
+                yearValue == 0 && categoryValue == BookEntry.CATEGORY_GENERAL &&
+                priceValue == 0 && quantityValue == 0 &&
+                TextUtils.isEmpty(supplierNameValue) && TextUtils.isEmpty(supplierPhoneValue)) {
+            isBookValid = false;
+        }
+
+        if (isBookValid) {
+            // Create a new map of values, where column names are the keys
+            ContentValues values = new ContentValues();
+            values.put(BookEntry.COLUMN_BOOK_NAME, nameValue);
+            values.put(BookEntry.COLUMN_BOOK_AUTHOR, authorValue);
+            values.put(BookEntry.COLUMN_BOOK_YEAR, yearValue);
+            values.put(BookEntry.COLUMN_BOOK_CATEGORY, categoryValue);
+            values.put(BookEntry.COLUMN_BOOK_PRICE, priceValue);
+            values.put(BookEntry.COLUMN_BOOK_QUANTITY, quantityValue);
+            values.put(BookEntry.COLUMN_BOOK_SUPPLIER_NAME, supplierNameValue);
+            values.put(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE, supplierPhoneValue);
+
+            int messageId = 0;
+            switch (mEditorMode) {
+                case MODE_INSERT:
+                    // Insert new book
+                    Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
+                    if (newUri != null) {
+                        messageId = R.string.success_add;
+                    } else {
+                        messageId = R.string.error_add;
+                    }
+                    break;
+                case MODE_EDIT:
+                    // Update existing book
+                    int mRowsUpdated = getContentResolver().update(mCurrentBookUri, values, null, null);
+                    if (mRowsUpdated > 0) {
+                        messageId = R.string.success_edit;
+                    } else {
+                        messageId = R.string.error_edit;
+                    }
+                    break;
+            }
+            Toast.makeText(this, getResources().getString(messageId), Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            Toast.makeText(this, R.string.fill_fields, Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 }
