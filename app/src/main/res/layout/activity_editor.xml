@@ -62,14 +62,14 @@
 
             <TextView
                 style="@style/EditorLabelStyle"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/default_padding"
                 android:text="@string/label_category" />
 
             <Spinner
                 android:id="@+id/category"
                 style="@style/EditorFieldStyle"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
                 android:spinnerMode="dropdown" />
         </LinearLayout>
 
@@ -91,7 +91,7 @@
 
             <TextView
                 style="@style/EditorLabelStyle"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/category_label_margin"
                 android:text="@string/label_quantity" />
 
             <LinearLayout style="@style/EditorFieldStyle">

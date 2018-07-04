@@ -12,7 +12,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.example.ami.mybookshop.data.BookContract.*;
+import com.example.ami.mybookshop.data.BookContract.BookEntry;
 
 public class BookProvider extends ContentProvider {
     /**

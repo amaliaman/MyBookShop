@@ -80,7 +80,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      * Track changes to controls
      */
     private boolean mBookHasChanged = false;
-
+    /**
+     * Quantity field to track if legal value
+     */
     private int mQuantity;
 
     @Override
@@ -144,10 +146,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case MODE_EDIT:
                 title = getString(R.string.edit_book);
                 getLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
-                if (mQuantity == 0) {
-                    mMinusButton.setEnabled(false);
-                    mMinusButton.setAlpha(Constants.DISABLED_ALPHA);
-                }
                 break;
 
             // insert new book
@@ -286,6 +284,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mSupplierPhoneEditText.setText(data.getString(data.getColumnIndex(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE)));
 
             mQuantity = data.getInt(data.getColumnIndex(BookEntry.COLUMN_BOOK_QUANTITY));
+        }
+
+        if (mEditorMode == MODE_EDIT && mQuantity == 0) {
+            mMinusButton.setEnabled(false);
+            mMinusButton.setAlpha(Constants.DISABLED_ALPHA);
         }
     }
 
@@ -505,13 +508,25 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     private boolean saveBook() {
-        // Retrieve values from controls
+        // Retrieve values from controls and validate
         String nameValue = mNameEditText.getText().toString().trim();
+        if (TextUtils.isEmpty(nameValue)) {
+            mNameEditText.setError(getString(R.string.required_message));
+            return false;
+        }
+
         String authorValue = mAuthorEditText.getText().toString().trim();
+        if (TextUtils.isEmpty(authorValue)) {
+            mAuthorEditText.setError(getString(R.string.required_message));
+            return false;
+        }
 
         int yearValue = 0;
         String yearRaw = mYearEditText.getText().toString().trim();
-        if (!TextUtils.isEmpty(yearRaw)) {
+        if (TextUtils.isEmpty(yearRaw)) {
+            mYearEditText.setError(getString(R.string.required_message));
+            return false;
+        } else {
             yearValue = Integer.parseInt(yearRaw);
         }
 
@@ -519,66 +534,67 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         double priceValue = 0;
         String priceRaw = mPriceEditText.getText().toString().trim();
-        if (!TextUtils.isEmpty(priceRaw)) {
+        if (TextUtils.isEmpty(priceRaw)) {
+            mPriceEditText.setError(getString(R.string.required_message));
+            return false;
+        } else {
             priceValue = Double.parseDouble(priceRaw);
         }
 
         int quantityValue = 0;
         String quantityRaw = mQuantityEditText.getText().toString().trim();
-        if (!TextUtils.isEmpty(quantityRaw)) {
+        if (TextUtils.isEmpty(quantityRaw)) {
+            mQuantityEditText.setError(getString(R.string.required_message));
+            return false;
+        } else {
             quantityValue = Integer.parseInt(quantityRaw);
         }
 
         String supplierNameValue = mSupplierNameEditText.getText().toString().trim();
-        String supplierPhoneValue = mSupplierPhoneEditText.getText().toString().trim();
-
-        // Check that all fields are filled
-        boolean isBookValid = true;
-        if (TextUtils.isEmpty(nameValue) && TextUtils.isEmpty(authorValue) &&
-                yearValue == 0 && categoryValue == BookEntry.CATEGORY_GENERAL &&
-                priceValue == 0 && quantityValue == 0 &&
-                TextUtils.isEmpty(supplierNameValue) && TextUtils.isEmpty(supplierPhoneValue)) {
-            isBookValid = false;
-        }
-
-        if (isBookValid) {
-            // Create a new map of values, where column names are the keys
-            ContentValues values = new ContentValues();
-            values.put(BookEntry.COLUMN_BOOK_NAME, nameValue);
-            values.put(BookEntry.COLUMN_BOOK_AUTHOR, authorValue);
-            values.put(BookEntry.COLUMN_BOOK_YEAR, yearValue);
-            values.put(BookEntry.COLUMN_BOOK_CATEGORY, categoryValue);
-            values.put(BookEntry.COLUMN_BOOK_PRICE, priceValue);
-            values.put(BookEntry.COLUMN_BOOK_QUANTITY, quantityValue);
-            values.put(BookEntry.COLUMN_BOOK_SUPPLIER_NAME, supplierNameValue);
-            values.put(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE, supplierPhoneValue);
-
-            int messageId = 0;
-            switch (mEditorMode) {
-                case MODE_INSERT:
-                    // Insert new book
-                    Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
-                    if (newUri != null) {
-                        messageId = R.string.success_add;
-                    } else {
-                        messageId = R.string.error_add;
-                    }
-                    break;
-                case MODE_EDIT:
-                    // Update existing book
-                    int mRowsUpdated = getContentResolver().update(mCurrentBookUri, values, null, null);
-                    if (mRowsUpdated > 0) {
-                        messageId = R.string.success_edit;
-                    } else {
-                        messageId = R.string.error_edit;
-                    }
-                    break;
-            }
-            Toast.makeText(this, getResources().getString(messageId), Toast.LENGTH_SHORT).show();
-            return true;
-        } else {
-            Toast.makeText(this, R.string.fill_fields, Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(supplierNameValue)) {
+            mSupplierNameEditText.setError(getString(R.string.required_message));
             return false;
         }
+
+        String supplierPhoneValue = mSupplierPhoneEditText.getText().toString().trim();
+        if (TextUtils.isEmpty(supplierPhoneValue)) {
+            mSupplierPhoneEditText.setError(getString(R.string.required_message));
+            return false;
+        }
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(BookEntry.COLUMN_BOOK_NAME, nameValue);
+        values.put(BookEntry.COLUMN_BOOK_AUTHOR, authorValue);
+        values.put(BookEntry.COLUMN_BOOK_YEAR, yearValue);
+        values.put(BookEntry.COLUMN_BOOK_CATEGORY, categoryValue);
+        values.put(BookEntry.COLUMN_BOOK_PRICE, priceValue);
+        values.put(BookEntry.COLUMN_BOOK_QUANTITY, quantityValue);
+        values.put(BookEntry.COLUMN_BOOK_SUPPLIER_NAME, supplierNameValue);
+        values.put(BookEntry.COLUMN_BOOK_SUPPLIER_PHONE, supplierPhoneValue);
+
+        int messageId = 0;
+        switch (mEditorMode) {
+            case MODE_INSERT:
+                // Insert new book
+                Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
+                if (newUri != null) {
+                    messageId = R.string.success_add;
+                } else {
+                    messageId = R.string.error_add;
+                }
+                break;
+            case MODE_EDIT:
+                // Update existing book
+                int mRowsUpdated = getContentResolver().update(mCurrentBookUri, values, null, null);
+                if (mRowsUpdated > 0) {
+                    messageId = R.string.success_edit;
+                } else {
+                    messageId = R.string.error_edit;
+                }
+                break;
+        }
+        Toast.makeText(this, getResources().getString(messageId), Toast.LENGTH_SHORT).show();
+        return true;
     }
 }

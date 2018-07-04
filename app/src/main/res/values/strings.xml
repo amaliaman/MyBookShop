@@ -96,4 +96,5 @@
     <string name="error_edit">Error updating book</string>
     <string name="editor_delete_book_successful_all">All books deleted</string>
     <string name="editor_delete_book_failed_all">Error deleting all books</string>
+    <string name="required_message">Field is required</string>
 </resources>
